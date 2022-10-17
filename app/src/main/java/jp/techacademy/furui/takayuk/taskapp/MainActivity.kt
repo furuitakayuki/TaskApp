@@ -9,9 +9,10 @@ import kotlinx.android.synthetic.main.activity_main.*
 import io.realm.RealmChangeListener
 import io.realm.Sort
 import android.content.Intent
+import android.widget.SearchView
 import androidx.appcompat.app.AlertDialog
 
-const val EXTRA_TASK = "jp.techacademy.taro.kirameki.taskapp.TASK"
+const val EXTRA_TASK = "jp.techacademy.furui.takayuk.taskapp.TASK"
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mRealm: Realm
@@ -89,11 +90,34 @@ class MainActivity : AppCompatActivity() {
         }
 
         reloadListView()
+
+        listView1.isTextFilterEnabled = true
+
+        search.setOnQueryTextListener(
+            object : SearchView.OnQueryTextListener {
+                // 入力テキストに変更があったとき
+                override fun onQueryTextChange(p0: String?): Boolean {
+                    if (p0.isNullOrBlank()) {
+                        listView1.clearTextFilter()
+                        reloadListView()
+                    } else {
+                        listView1.setFilterText(p0)
+                        categoryListView()
+                    }
+                    return false
+                }
+                // 検索ボタンを押したとき
+                override fun onQueryTextSubmit(p0: String?): Boolean {
+                    return false
+                }
+            }
+        )
     }
 
     private fun reloadListView() {
         // Realmデータベースから、「すべてのデータを取得して新しい日時順に並べた結果」を取得
-        val taskRealmResults = mRealm.where(Task::class.java).findAll().sort("date", Sort.DESCENDING)
+        val taskRealmResults =
+            mRealm.where(Task::class.java).findAll().sort("date", Sort.DESCENDING)
 
         // 上記の結果を、TaskListとしてセットする
         mTaskAdapter.mTaskList = mRealm.copyFromRealm(taskRealmResults)
@@ -102,6 +126,15 @@ class MainActivity : AppCompatActivity() {
         listView1.adapter = mTaskAdapter
 
         // 表示を更新するために、アダプターにデータが変更されたことを知らせる
+        mTaskAdapter.notifyDataSetChanged()
+    }
+
+    private fun categoryListView() {
+        val searchs = search.query
+        val categorys = mRealm.where(Task::class.java).equalTo("category", searchs.toString()).findAll()
+
+        mTaskAdapter.mTaskList = mRealm.copyFromRealm(categorys)
+        listView1.adapter = mTaskAdapter
         mTaskAdapter.notifyDataSetChanged()
     }
 

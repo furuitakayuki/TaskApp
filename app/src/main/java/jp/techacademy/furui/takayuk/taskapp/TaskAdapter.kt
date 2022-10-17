@@ -1,5 +1,6 @@
 package jp.techacademy.furui.takayuk.taskapp
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -29,13 +30,14 @@ class TaskAdapter(context: Context): BaseAdapter() {
         return mTaskList[position].id.toLong()
     }
 
+    @SuppressLint("SetTextI18n")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val view: View = convertView ?: mLayoutInflater.inflate(android.R.layout.simple_list_item_2, null)
 
         val textView1 = view.findViewById<TextView>(android.R.id.text1)
         val textView2 = view.findViewById<TextView>(android.R.id.text2)
 
-        textView1.text = mTaskList[position].title
+        textView1.text = mTaskList[position].title + "    " + mTaskList[position].category
 
         val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.JAPANESE)
         val date = mTaskList[position].date
